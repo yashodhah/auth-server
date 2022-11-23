@@ -13,11 +13,6 @@ public class ResourceController {
         return "healthy!";
     }
 
-    @GetMapping("/login")
-    public String loginEndpoint() {
-        return "Login!";
-    }
-
     @GetMapping("/admin")
     public String adminEndpoint() {
         return "Admin!";
