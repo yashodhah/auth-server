@@ -3,6 +3,8 @@ package com.example.authserver.controller;
 import com.example.authserver.models.*;
 import com.example.authserver.reposiotory.RoleRepository;
 import com.example.authserver.reposiotory.UserRepository;
+import com.example.authserver.utils.JWTPayloadInfo;
+import com.example.authserver.utils.JWTUtils;
 import com.example.authserver.utils.payload.SignInRequest;
 import com.example.authserver.utils.payload.SignUpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -20,29 +23,50 @@ import java.util.Set;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    @Autowired
     AuthenticationManager authenticationManager;
 
-    @Autowired
     RoleRepository roleRepository;
 
-    @Autowired
     UserRepository userRepository;
 
+    PasswordEncoder passwordEncoder;
+
+    JWTUtils jwtUtils;
+
+    @Autowired
+    public AuthController(AuthenticationManager authenticationManager,
+                          RoleRepository roleRepository,
+                          UserRepository userRepository,
+                          PasswordEncoder passwordEncoder,
+                          JWTUtils jwtUtils
+    ) {
+        this.authenticationManager = authenticationManager;
+        this.roleRepository = roleRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtils = jwtUtils;
+    }
+
     @PostMapping("/signin")
-    public String signIn(@Valid @RequestBody SignInRequest signInRequest) {
+    public ResponseEntity<String> signIn(@Valid @RequestBody SignInRequest signInRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(signInRequest.getUsername(), signInRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        return "Login!";
+        String jwt = jwtUtils.generateJwtToken(new JWTPayloadInfo(authentication.getName()));
+
+        return ResponseEntity.ok(jwt);
     }
 
     @PostMapping("/signup")
     public ResponseEntity<String> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
         Set<Role> userRoles = getUserRoles(signUpRequest);
-        User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(), signUpRequest.getPassword(), userRoles);
+        User user = new User(
+                signUpRequest.getUsername(),
+                signUpRequest.getEmail(),
+                passwordEncoder.encode(signUpRequest.getPassword()),
+                userRoles);
 
         userRepository.save(user);
 
