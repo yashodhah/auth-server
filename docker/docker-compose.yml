@@ -6,6 +6,7 @@ services:
     restart: always
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgres-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: yd
       POSTGRES_PASSWORD: 123

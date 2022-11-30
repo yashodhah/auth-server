@@ -5,6 +5,7 @@ import com.example.authserver.reposiotory.RoleRepository;
 import com.example.authserver.reposiotory.UserRepository;
 import com.example.authserver.utils.JWTPayloadInfo;
 import com.example.authserver.utils.JWTUtils;
+import com.example.authserver.utils.payload.AuthResponse;
 import com.example.authserver.utils.payload.SignInRequest;
 import com.example.authserver.utils.payload.SignUpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<String> signIn(@Valid @RequestBody SignInRequest signInRequest) {
+    public ResponseEntity<AuthResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(signInRequest.getUsername(), signInRequest.getPassword()));
 
@@ -56,7 +57,7 @@ public class AuthController {
 
         String jwt = jwtUtils.generateJwtToken(new JWTPayloadInfo(authentication.getName()));
 
-        return ResponseEntity.ok(jwt);
+        return ResponseEntity.ok(new AuthResponse(jwt));
     }
 
     @PostMapping("/signup")
