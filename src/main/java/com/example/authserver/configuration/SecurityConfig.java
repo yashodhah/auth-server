@@ -28,20 +28,23 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/auth/*").permitAll()
-                .antMatchers("/test/*").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest()
+                .authenticated()
                 .and()
                 .httpBasic()
                 .and()
                 .exceptionHandling()
-                .authenticationEntryPoint(authEntryPoint);
+                .authenticationEntryPoint(authEntryPoint)
+                .and()
+                .oauth2ResourceServer()
+                .jwt()
+        ;
 
         http.authenticationProvider(authenticationProvider());
 
         return http.build();
     }
 
-    // TODO: WHat is this
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -52,7 +55,6 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    // TODO: WHat is this
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();

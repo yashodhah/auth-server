@@ -3,7 +3,6 @@ package com.example.authserver.controller;
 import com.example.authserver.models.*;
 import com.example.authserver.reposiotory.RoleRepository;
 import com.example.authserver.reposiotory.UserRepository;
-import com.example.authserver.utils.JWTPayloadInfo;
 import com.example.authserver.utils.JWTUtils;
 import com.example.authserver.utils.payload.AuthResponse;
 import com.example.authserver.utils.payload.SignInRequest;
@@ -13,13 +12,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")
@@ -55,21 +55,33 @@ public class AuthController {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String jwt = jwtUtils.generateJwtToken(new JWTPayloadInfo(authentication.getName()));
+        Map<String, String> claims = new HashMap<>();
+        claims.put("username", authentication.getName());
+        claims.put("authorities",
+                authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
+
+        String jwt = jwtUtils.createJwtForClaims(authentication.getName(), claims);
 
         return ResponseEntity.ok(new AuthResponse(jwt));
     }
 
     @PostMapping("/signup")
     public ResponseEntity<String> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
+        Optional<User> user = userRepository.findByUsernameOrEmail(signUpRequest.getUsername(), signUpRequest.getEmail());
+
+        if (user.isPresent()) {
+            return ResponseEntity.badRequest().body("User already exists");
+        }
+
         Set<Role> userRoles = getUserRoles(signUpRequest);
-        User user = new User(
+
+        User newUser = new User(
                 signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
                 passwordEncoder.encode(signUpRequest.getPassword()),
                 userRoles);
 
-        userRepository.save(user);
+        userRepository.save(newUser);
 
         return ResponseEntity.ok("User registered successfully!");
     }
