@@ -124,4 +124,9 @@ public class AuthController {
 
         return userRoles;
     }
+
+    @GetMapping
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Hello from auth server");
+    }
 }
