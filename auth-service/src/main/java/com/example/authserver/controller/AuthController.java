@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -86,6 +87,11 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully!");
     }
 
+    @GetMapping
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Hello from auth server");
+    }
+
     private Set<Role> getUserRoles(SignUpRequest signUpRequest) {
         Set<Role> userRoles = new HashSet<>();
         Set<String> requestedRoles = signUpRequest.getRoles();
@@ -123,10 +129,5 @@ public class AuthController {
 
 
         return userRoles;
-    }
-
-    @GetMapping
-    public ResponseEntity<String> health() {
-        return ResponseEntity.ok("Hello from auth server");
     }
 }

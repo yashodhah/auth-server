@@ -26,12 +26,12 @@ class AuthServerApplicationTests {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
     }
 
-    @Test
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
-    public void whenUserAccessLogin_shouldSucceed() throws Exception {
-        mockMvc.perform(formLogin("/auth/signin").user("username", "yd123")
-                        .password("password", "12345678")
-                        .acceptMediaType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
+//    @Test
+//    @WithMockUser(username = "admin", roles = {"ADMIN"})
+//    public void whenUserAccessLogin_shouldSucceed() throws Exception {
+//        mockMvc.perform(formLogin("/auth/signin").user("username", "yd123")
+//                        .password("password", "12345678")
+//                        .acceptMediaType(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk());
+//    }
 }

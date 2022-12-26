@@ -1,0 +1,55 @@
+version: '3.9'
+services:
+  keycloak:
+    container_name: keycloak_server
+    image: jboss/keycloak:latest
+    ports:
+      - "8084:8080"
+      - "8087:8087" # debug port
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=password
+      - DB_DATABASE=keycloak_db
+      - DB_USER=admin
+      - DB_PASSWORD=password
+      - DB_ADDR=keycloakdb
+      - DB_VENDOR=postgres
+      - KEYCLOAK_IMPORT=/tmp/realm-export.json
+    volumes:
+      - ./realms/realm-export.json:/tmp/realm-export.json
+    networks:
+      internal:
+    depends_on:
+      - keycloakdb
+
+  keycloakdb:
+    container_name: pg_container_kc
+    image: postgres:latest
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=keycloak_db
+    volumes:
+      - keycloak-postgres:/var/lib/postgresql/data
+    networks:
+      internal:
+
+  pgadmin:
+    container_name: pgadmin4_container_kc
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+
+volumes:
+  keycloak-postgres:
+
+networks:
+  internal:
+    name: backend
+    driver: bridge

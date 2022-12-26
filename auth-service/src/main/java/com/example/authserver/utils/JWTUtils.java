@@ -56,4 +56,8 @@ public class JWTUtils {
                 .withExpiresAt(new Date((new Date()).getTime() + jwtExpirationMs))
                 .sign(Algorithm.RSA256(publicKey, privateKey));
     }
+
+    public RSAPublicKey getPublicKey() {
+        return publicKey;
+    }
 }
